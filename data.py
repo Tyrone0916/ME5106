@@ -50,8 +50,6 @@ def calculate_spl(V):
     SPL = 20 * math.log10(V / vpp) + 94
     return SPL
 
-
-
 # 显示加载的数据内容
 # print(data_raw)
 # print(data_denoise)
@@ -75,9 +73,9 @@ spl_result = np.array([
 ])
 
 # print(isinstance(spl_result, np.ndarray))
-print('spl_result',spl_result)
+# print('spl_result',spl_result)
 # print(isinstance(rms_result, np.ndarray))
-print('rms_result',rms_result)
+# print('rms_result',rms_result)
 
 # 创建结构化数组
 dt = np.dtype([
