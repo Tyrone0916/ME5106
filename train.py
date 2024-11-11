@@ -8,16 +8,18 @@ from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 
 
-def train(spl_result, rms_result, power_speed, epochs=num_epochs):
+def train(spl_max_result, spl_rms_result, loc, power_speed, epochs=num_epochs):
     # 数据准备
     # 确保只使用数值数据，去掉字符串
-    spl_values = np.array([x[1] for x in spl_result], dtype=np.float32)
-    rms_values = np.array([x[1] for x in rms_result], dtype=np.float32)
+    spl_values = np.array([x[1] for x in spl_max_result], dtype=np.float32)
+    rms_values = np.array([x[1] for x in spl_rms_result], dtype=np.float32)
     power_values = power_speed['laser_power'].astype(np.float32)
     speed_values = power_speed['scan_speed'].astype(np.float32)
+    loc = np.array(list(data_loc.values()))
+    # loc = data_loc.astype(np.float32)
     
     # 将输入特征组合在一起
-    X = torch.tensor(np.column_stack((spl_values, rms_values)), dtype=torch.float32)
+    X = torch.tensor(np.column_stack((spl_values, rms_values, loc)), dtype=torch.float32)
     # print('X',X)
     # print('X.shape',X.shape)
     y = torch.tensor(np.column_stack((power_values, speed_values)), dtype=torch.float32)
@@ -28,7 +30,7 @@ def train(spl_result, rms_result, power_speed, epochs=num_epochs):
     dataset = TensorDataset(X, y)
     train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
     # 创建模型实例
-    model = LaserProcessingNet(spl_result, rms_result, power_speed)
+    model = LaserProcessingNet(spl_max_result, spl_rms_result, loc, power_speed)
     # 定义损失函数和优化器
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -70,14 +72,16 @@ def train(spl_result, rms_result, power_speed, epochs=num_epochs):
 
 
 if __name__ == "__main__":
-    trained_model = train(spl_result, rms_result, power_speed)
+    trained_model = train(spl_max_reuslt, spl_rms_result, data_loc, power_speed)
     # 保存模型
     torch.save(trained_model.state_dict(), 'laser_model.pth')
     # 测试模型
     trained_model.eval()
     with torch.no_grad():
         # 准备测试数据
-        test_X = torch.tensor([[82.6, 1.355]], dtype=torch.float32) #"A10"
+        test_X = torch.tensor([[82.6, 1.355, 22.5, 299.5, 375]], dtype=torch.float32) #"A10"
         predictions = trained_model(test_X)
         print("\n测试结果:")
         print("预测的激光功率和扫描速度:", predictions.numpy())
+        print("真实的激光功率和扫描速度:200， 400")
+# 24% 73%

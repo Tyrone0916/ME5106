@@ -5,9 +5,9 @@ from scipy.io import loadmat
 
 
 # 加载 .mat 文件
-data_raw = loadmat('dataRaw.mat')
-data_denoise = loadmat('dataDenoise.mat')
-data_singletracks = loadmat('dataSingleTracks.mat')
+data_raw = loadmat('/home/tengyu/ME5106/mini_proj3/ME5106/dataRaw.mat')
+data_denoise = loadmat('/home/tengyu/ME5106/mini_proj3/ME5106/dataDenoise.mat')
+data_singletracks = loadmat('/home/tengyu/ME5106/mini_proj3/ME5106/dataSingleTracks.mat')
 data = {
     'A1': [350, 1200], 'A2': [400, 600], 'A3': [250, 600], 'A4': [250, 1000],
     'A5': [400, 1000], 'A7': [350, 700], 'A8': [200, 500], 'A9': [350, 500],
@@ -16,8 +16,45 @@ data = {
     'B5': [150, 500], 'B6': [300, 800], 'B7': [150, 400], 'B8': [300, 700],
     'B9': [400, 1600], 'B11': [150, 200], 'B13': [400, 2000]
 }
-# power_speed 激光功率和扫描速度
+data_loc = {
+    "A1": (0, 209.5, 307),
+    "A2": (0, 232, 323),
+    "A3": (0, 254.5, 340),
+    "A4": (0, 277, 357),
+    "A5": (0, 299.5, 375),
+   # "A6": (22.5, 209.5, 308),
+    "A7": (22.5, 232, 324),
+    "A8": (22.5, 254.5, 340),
+    "A9": (22.5, 277, 358),
+    "A10": (22.5, 299.5, 375),
+    "A11": (22.5, 322, 393),
+    "A12": (22.5, 344.5, 412),
+    "A13": (45, 209.5, 311),
+    "B1": (45, 232, 326),
+    "B2": (45, 254.5, 343),
+    "B3": (45, 277, 360),
+    "B4": (45, 299.5, 377),
+    "B5": (45, 322, 395),
+    "B6": (45, 344.5, 414),
+    "B7": (67.5, 209.5, 315),
+    "B8": (67.5, 232, 330),
+    "B9": (67.5, 254.5, 346),
+   # "B10": (67.5, 277, 363),
+    "B11": (67.5, 299.5, 381),
+   # "B12": (67.5, 322, 399),
+    "B13": (67.5, 344.5, 417)
+}
 
+
+# features
+# max
+# average or  rms?
+# loc
+
+
+
+
+# power_speed 激光功率和扫描速度
 
 # hyperparameters
 p_ref = 20 # u pa
@@ -25,8 +62,6 @@ vpp = 5 # mv/pa
 
 # model parameters
 num_epochs = 500
-
-
 
 
 def calculate_moment_sound_pressure(V):
@@ -54,23 +89,36 @@ def calculate_spl(V):
 # print(data_raw)
 # print(data_denoise)
 rms_result = {}
-spl_result = {}
-# print("数据结构信息：")
+rms_max_result = {}
+spl_rms_result = {}
+spl_max_reuslt = {}
+
 for key in data_singletracks.keys():
     if key != '__header__' and key != '__version__' and key != '__globals__' \
             and key != 'A6' and key != 'B10' and key != 'B12':
         # print(key)
-        rms_result[key] = calculate_rms_voltage(data_singletracks[key])     # dict
-        spl_result[key] = calculate_spl(rms_result[key])                    # dict
+        rms_result[key] = calculate_rms_voltage(data_singletracks[key])         # dict
+        spl_rms_result[key] = calculate_spl(rms_result[key])                    # dict
 
-rms_result = np.array([
+        rms_max_result = max(data_singletracks[key])
+        spl_max_reuslt[key] = calculate_spl(rms_max_result)
+
+
+
+# rms_result = np.array([
+#     (name, value) 
+#     for name, value in rms_result.items()
+# ])
+spl_rms_result = np.array([
     (name, value) 
-    for name, value in rms_result.items()
+    for name, value in spl_rms_result.items()
 ])
-spl_result = np.array([
+spl_max_reuslt = np.array([
     (name, value) 
-    for name, value in spl_result.items()
+    for name, value in spl_max_reuslt.items()
 ])
+
+
 
 # print(isinstance(spl_result, np.ndarray))
 # print('spl_result',spl_result)
